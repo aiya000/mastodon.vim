@@ -18,11 +18,18 @@ endfunction
 " --- Script local --- "
 
 function! s:open_result_buffer(job_struct, _, __, ___) abort
-	let l:toots = s:JSON.decode(a:job_struct.stdout_result)
+	let l:toots        = s:JSON.decode(a:job_struct.stdout_result)
+	let l:format_toots = []
 	for l:toot in l:toots
-		let l:account = l:toot.account
-		let l:account_username     = l:account.username
-		let l:account_display_name = l:account.display_name
-		VimConsoleLog l:account_username
+		let l:account_username     = l:toot.account.username
+		let l:account_display_name = l:toot.account.display_name
+		let l:toot_detail = mastodon#func#render_html(l:toot.content)
+		let l:format_toot = printf("%s(%s)\n%s", l:account_username, l:account_display_name, l:toot_detail)
+		call insert(l:format_toots, l:format_toot)
 	endfor
+
+	let l:hometimeline = "- - - - -\n" . join(l:format_toots, "- - - - -\n")
+	new | setl noreadonly modifiable
+	put=l:hometimeline
+	setl filetype=mastodon_home buftype=nofile nomodifiable
 endfunction

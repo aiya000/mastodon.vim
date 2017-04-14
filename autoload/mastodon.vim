@@ -16,7 +16,6 @@ function! mastodon#open_home(mastodon_instance_name) abort
 	endif
 
 	" Request authentication and get access_token for this app
-	let l:access_token = mastodon#account#auth_default_account(a:mastodon_instance_name).access_token
-	call mastodon#home#show_hometimeline(a:mastodon_instance_name, l:access_token)
+	let l:account = mastodon#account#auth_default_account(a:mastodon_instance_name)
+	call mastodon#home#show_hometimeline(a:mastodon_instance_name, l:account.access_token)
 endfunction
-
