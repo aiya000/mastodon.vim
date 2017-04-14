@@ -9,3 +9,6 @@ A mastodon client for Vim and NeoVim
 ## If you use Vim
 - Vim 8 or later
 - +job
+
+## If you use NeoVim
+- NeoVim 0.2.0 or later
