@@ -1,6 +1,6 @@
-let s:V    = vital#mastodon#new()
-let s:Job  = s:V.import('System.Job')
-let s:JSON = s:V.import('Web.JSON')
+let s:V      = vital#mastodon#new()
+let s:JSON   = s:V.import('Web.JSON')
+let s:Option = s:V.import('Data.Optional')
 
 "TODO: Use serialized file (implement the arround of mastodon#add_account)
 function! mastodon#account#auth_default_account(mastodon_instance_name) abort
@@ -21,7 +21,9 @@ function! mastodon#account#auth_default_account(mastodon_instance_name) abort
 
 	"TODO: I may can use vital's system()
 	let l:result = system(printf('curl -X POST --silent "%s"', l:request_url))
-	return s:JSON.decode(l:result)
-
-	"TODO: Throw exception if s:JSON.decode(l:result) hasn't access_token property
+	try
+		return s:Option.some(s:JSON.decode(l:result))
+	catch /E15/
+		return s:Option.none()
+	endtry
 endfunction
