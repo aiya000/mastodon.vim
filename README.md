@@ -5,6 +5,7 @@ A mastodon client for Vim and NeoVim
 # Requirements
 ## Basement
 - curl
+- w3m
 
 ## If you use Vim
 - Vim 8 or later
