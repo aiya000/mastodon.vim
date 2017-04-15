@@ -11,15 +11,12 @@ let s:Option = s:V.import('Data.Optional')
 "endfunction
 
 function! mastodon#open_home(mastodon_instance_name) abort
-	if empty(a:mastodon_instance_name)
-		echohl Error
-		echo 'Please specify instance name'
-		echohl None
-		return
-	endif
+	let l:mastodon_instance_name = empty(a:mastodon_instance_name)
+	\                            ? input('input instane name: ')
+	\                            : a:mastodon_instance_name
 
 	" Request authentication and get access_token for this app
-	let l:maybe_account = mastodon#account#auth_default_account(a:mastodon_instance_name)
+	let l:maybe_account = mastodon#account#auth_default_account(l:mastodon_instance_name)
 	if s:Option.empty(l:maybe_account)
 		redraw
 		echohl Error
@@ -29,5 +26,5 @@ function! mastodon#open_home(mastodon_instance_name) abort
 	endif
 
 	let l:account = s:Option.get(l:maybe_account)
-	call mastodon#home#show_hometimeline(a:mastodon_instance_name, l:account.access_token)	
+	call mastodon#home#show_hometimeline(l:mastodon_instance_name, l:account.access_token)	
 endfunction
