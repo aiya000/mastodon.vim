@@ -6,7 +6,7 @@ let s:Option = s:V.import('Data.Optional')
 function! mastodon#account#auth_default_account(mastodon_instance_name) abort
 	let l:instance_url     = mastodon#func#get_instance_url(a:mastodon_instance_name)
 	let l:account_name     = g:mastodon_instances[a:mastodon_instance_name].default_account
-	let l:account_password = input('input password for ' . l:account_name . ': ')
+	let l:account_password = inputsecret('input password for ' . l:account_name . ': ')
 
 	let l:parameters = printf(
 	\	'client_id=%s&client_secret=%s&grant_type=password&username=%s&password=%s',
