@@ -10,13 +10,18 @@ let s:Option = s:V.import('Data.Optional')
 "	" Serialize to file
 "endfunction
 
-function! mastodon#open_home(mastodon_instance_name) abort
-	let l:mastodon_instance_name = empty(a:mastodon_instance_name)
-	\                            ? input('input instane name: ')
-	\                            : a:mastodon_instance_name
+function! mastodon#open_home(...) abort
+	let l:mastodon_instance_name = exists('a:1')
+	\                            ? a:1
+	\                            : input('input instane name: ')
+	let l:mastodon_account_name = exists('a:2')
+	\                           ? a:2
+	\                           : exists(printf('g:mastodon_instances["%s"].default_account', l:mastodon_instance_name))
+	\                             ? g:mastodon_instances[l:mastodon_instance_name].default_account
+	\                             : input('input account name: ')
 
 	" Request authentication and get access_token for this app
-	let l:maybe_account = mastodon#account#auth_default_account(l:mastodon_instance_name)
+	let l:maybe_account = mastodon#account#auth_default_account(l:mastodon_instance_name, l:mastodon_account_name)
 	if s:Option.empty(l:maybe_account)
 		redraw
 		echohl Error

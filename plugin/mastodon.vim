@@ -1,5 +1,5 @@
 "command -bar MastodonAddAccount call mastodon#add_account()
-command -bar -nargs=? MastodonHome call mastodon#open_home(<q-args>)
+command -bar -nargs=* MastodonHome call mastodon#open_home(<f-args>)
 
 let g:mastodon_instances = get(g:, 'mastodon_instances', {})
 
