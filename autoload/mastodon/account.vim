@@ -1,41 +1,68 @@
 let s:V      = vital#mastodon#new()
+let s:Dict   = s:V.import('Data.Dict')
 let s:JSON   = s:V.import('Web.JSON')
+let s:List   = s:V.import('Data.List')
 let s:Option = s:V.import('Data.Optional')
 
-"TODO: Don't use plain text for password
+
+"FIXME: Don't use plain text for password
 "TODO: If user chose account is already exists
 function! mastodon#account#create(args) abort
+	" v g:mastodon#CONFIG_FILE_PATH structure example
+	" { 'mastodon.cloud':                        <-- the instance domain as key
+	"   [                                        <-- the account list of 'mastodon.cloud'
+	"     { 'name': 'aiya000.develop@gmail.com'  <-- an account of 'mastodon.cloud'
+	"     , 'password': 'gavriil_dropout'
+	"     }
+	"   ]
+	" }
+
 	let l:instance_domain = exists('a:args[0]')
 	\                     ? a:args[0]
 	\                     : input('instance domain(ex: mastodon.cloud, mastodon.jp): ')
+
 	let l:account_name = exists('a:args[1]')
 	\                  ? a:args[1]
 	\                  : input('account name for the domain(ex: aiya000@example.com): ')
 	let l:account_password = inputsecret('account password: ')
 	let l:account = {
-	\	'instance_domain': l:instance_domain,
-	\	'account_name': l:account_name,
-	\	'account_password': l:account_password,
+	\	'name': l:account_name,
+	\	'password': l:account_password,
 	\}
 
 	"TODO: xdg dir
 	"TODO: If decoding is failed
-	let l:old_accounts = filereadable(g:mastodon#CONFIG_JSON)
-	\                  ? s:JSON.decode(readfile(g:mastodon#CONFIG_JSON))
-	\                  : []
-
-	let l:serialized_accounts = s:JSON.encode(insert(l:old_accounts, l:account))
-	call writefile([l:serialized_accounts], g:mastodon#CONFIG_JSON)
+	let l:old_instances = filereadable(g:mastodon#CONFIG_FILE_PATH)
+	\                   ? s:JSON.decode(readfile(g:mastodon#CONFIG_FILE_PATH))
+	\                   : {}
+	if !has_key(l:old_instances, l:instance_domain)
+		" Create an item
+		let l:old_instances[l:instance_domain] = [l:account]
+		let l:new_instances = l:old_instances
+	else
+		let l:new_instances = insert(l:old_instances[l:instance_domain], l:account)
+	endif
+	call writefile([s:JSON.encode(l:new_instances)], g:mastodon#CONFIG_FILE_PATH)
 
 	redraw
 	echomsg l:account_name . ' is added ! (' . l:instance_domain . ')'
 endfunction
 
 
+function! mastodon#account#may_read_accounts() abort
+	"TODO: If decode is failed
+	if filereadable(g:mastodon#CONFIG_FILE_PATH)
+		return s:Option.some(s:JSON.decode(g:mastodon#CONFIG_FILE_PATH))
+	else
+		return s:Option.none()
+	endif
+endfunction
+
+
 "TODO: Use serialized file (implement the arround of mastodon#add_account)
-function! mastodon#account#auth_default_account(mastodon_instance_name, mastodon_account_name) abort
-	let l:instance_url     = mastodon#func#get_instance_url(a:mastodon_instance_name)
-	let l:account_password = inputsecret('input password for ' . a:mastodon_account_name . ': ')
+function! mastodon#account#auth_default_account(acount) abort
+	let l:instance_url     = mastodon#func#get_instance_url(a:account.mastodon_instance_name)
+	let l:account_password = inputsecret('input password for ' . a:account.mastodon_account_name . ': ')
 
 	let l:parameters = printf(
 	\	'client_id=%s&client_secret=%s&grant_type=password&username=%s&password=%s',
