@@ -3,13 +3,13 @@
 " Do not mofidify the code nor insert new lines before '" ___vital___'
 if v:version > 703 || v:version == 703 && has('patch1170')
   function! vital#_mastodon#Data#Optional#import() abort
-    return map({'flatten': '', 'some': '', 'apply': '', 'set': '', 'get_unsafe': '', 'is_optional': '', 'echo': '', 'exists': '', 'none': '', 'empty': '', 'get': '', 'has': '', 'unset': '', 'bind': '', 'get_or': ''},  'function("s:" . v:key)')
+    return map({'flatten': '', 'some': '', 'apply': '', 'none': '', 'get_unsafe': '', 'is_optional': '', 'echo': '', 'exists': '', 'map': '', 'empty': '', 'get': '', 'has': '', 'unset': '', 'bind': '', 'get_or': '', 'set': ''},  'function("s:" . v:key)')
   endfunction
 else
   function! s:_SID() abort
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze__SID$')
   endfunction
-  execute join(['function! vital#_mastodon#Data#Optional#import() abort', printf("return map({'flatten': '', 'some': '', 'apply': '', 'set': '', 'get_unsafe': '', 'is_optional': '', 'echo': '', 'exists': '', 'none': '', 'empty': '', 'get': '', 'has': '', 'unset': '', 'bind': '', 'get_or': ''}, \"function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
+  execute join(['function! vital#_mastodon#Data#Optional#import() abort', printf("return map({'flatten': '', 'some': '', 'apply': '', 'none': '', 'get_unsafe': '', 'is_optional': '', 'echo': '', 'exists': '', 'map': '', 'empty': '', 'get': '', 'has': '', 'unset': '', 'bind': '', 'get_or': '', 'set': ''}, \"function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
   delfunction s:_SID
 endif
 " ___vital___
@@ -99,6 +99,10 @@ function! s:apply(f, ...) abort
   endif
 
   return s:some(call(a:f, map(copy(a:000), 'v:val[0]')))
+endfunction
+
+function! s:map(f, x) abort
+	return s:apply(a:f, a:x)
 endfunction
 
 function! s:bind(f, ...) abort
