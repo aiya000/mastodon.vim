@@ -8,19 +8,26 @@ let s:Option = s:V.import('Data.Optional')
 "FIXME: Don't use plain text for password
 "TODO: If user chose account is already exists
 function! mastodon#account#create(args) abort
-	" v g:mastodon#CONFIG_FILE_PATH structure example
-	" { 'mastodon.cloud':                        <-- the instance domain as key
-	"   [                                        <-- the account list of 'mastodon.cloud'
-	"     { 'name': 'aiya000.develop@gmail.com'  <-- an account of 'mastodon.cloud'
-	"     , 'password': 'gavriil_dropout'
-	"     }
-	"   ]
-	" }
+	" vvv g:mastodon#CONFIG_FILE_PATH structure example vvv
+	" [                                        <-- instances
+	"   { 'instance_domain': 'mastodon.cloud'  <-- the instance domain
+	"   , 'account':
+	"     [                                    <-- the account list of 'mastodon.cloud'
+	"       { 'name': aiya000.develop@gmail'   <-- an account of 'mastodon.cloud'
+	"       , 'password': 'gavriil_dropout'
+	"       }
+	"     ]
+	"   }
+	" ]
+
+	"TODO: If decoding is failed
+	let l:old_instances = filereadable(g:mastodon#CONFIG_FILE_PATH)
+	\                   ? s:read_json(g:mastodon#CONFIG_FILE_PATH)
+	\                   : []
 
 	let l:instance_domain = exists('a:args[0]')
 	\                     ? a:args[0]
 	\                     : input('instance domain(ex: mastodon.cloud, mastodon.jp): ')
-
 	let l:account_name = exists('a:args[1]')
 	\                  ? a:args[1]
 	\                  : input('account name for the domain(ex: aiya000@example.com): ')
