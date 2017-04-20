@@ -12,56 +12,66 @@ endfunction
 
 function! mastodon#open_home(...) abort
 	" Read account information from serialized file (See mastodon#add_account())
-	let l:maybe_accounts = mastodon#account#may_read_accounts()
-	if s:Option.empty(l:maybe_accounts)
+	let l:maybe_instances = mastodon#account#may_read_instances()
+	if s:Option.empty(l:maybe_instances)
 		echohl Error
 		echo 'The config file reading (' . g:mastodon#CONFIG_FILE_PATH . ') is failed.'
 		echo 'Do you executed :MastodonAddAccount ?'
 		echohl None
 		return
 	endif
-	let l:accounts = s:Option.get(l:maybe_accounts)
+	let l:instances = s:Option.get(l:maybe_instances)
 
 	" Confirm target account for logging in
-	let l:chosen_account         = s:input_account_choice(a:000)
-	let l:chosen_instance_domain = keys(l:chosen_account)[0]
-	VimConsoleLog l:accounts
-	" l:chosen_account.keys ∈ l:chosen_instance_domain ?
-	if !s:List.has(map(l:accounts, {x -> keys(x)}), l:chosen_instance_domain)
+	let l:chosen_single_account = s:input_instance_account_choice(a:000)
+	" (?) l:chosen_single_account.instance_domain ∈ l:instances.map({x -> x.instance_domain})
+	let l:instance = s:List.find(l:instances, v:null, printf('v:val.instance_domain ==# "%s"', l:chosen_single_account.instance_domain))
+	if l:instance is v:null
 		echohl Error
-		echo l:chosen_instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
+		echo l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
 		echohl None
 		return
 	endif
 
-	let l:maybe_account = s:Option.lookup(l:chosen_instance_domain, l:accounts)
-	if !l:Option.empty(l:maybe_account)
+	let l:account = s:List.find(l:instance.account, v:null, printf('v:val.name ==# "%s"', l:chosen_single_account.account_name))
+	if l:account is v:null
 		echohl Error
-		echo l:chosen_account.name . ' of ' l:chosen_instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
+		echo l:chosen_account.account.name . ' of ' l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
 		echohl None
 		return
 	endif
-	let l:account = s:Option.get(l:maybe_account)
-	let l:account.password = l:chosen_account[l:chosen_instance_domain].password
+	let l:determined_single_account = {
+	\	'instance_domain': l:chosen_single_account.instance_domain,
+	\	'account_name': l:chosen_single_account.account_name,
+	\	'account_password': l:account.password,
+	\}
+	" Don't putting off to kill (for code ability)
+	unlet l:account l:instance l:chosen_single_account l:instances l:maybe_instances
 
 	" Request access token for this app
-	let l:maybe_auth_info = mastodon#account#auth_default_account(l:account)
-	if s:Option.empty(l:maybe_auth_info)
+	let l:maybe_auth_result = mastodon#account#auth_default_account(l:determined_single_account)
+	if s:Option.empty(l:maybe_auth_result)
 		redraw
 		echohl Error
 		echomsg 'Sorry, your account authentication is failed'
 		echohl None
 		return
 	endif
+	let l:auth_result = s:Option.get(l:maybe_auth_result)
 
 	" Send results
-	call mastodon#home#show_hometimeline(l:chosen_instance_domain, l:account.access_token)
+	call mastodon#home#show_hometimeline(l:determined_single_account.instance_domain, l:auth_result.access_token)
+endfunction
+
+
+function! mastodon#open_say_buffer(...) abort
 endfunction
 
 
 " --- Scritp local --- "
 
-function! s:input_account_choice(args) abort
+" Return 'single_account' structure
+function! s:input_instance_account_choice(args) abort
 	let l:instance_domain = exists('a:args[0]')
 	\                     ? a:args[0]
 	\                     : input('input instance domain(ex: mastodon.cloud, mastodon.jp): ')
@@ -71,9 +81,8 @@ function! s:input_account_choice(args) abort
 	\                    ? g:mastodon_instances[l:instance_domain].default_account
 	\                    : input('input account name for the domain(ex: aiya000@example.com): ')
 	return {
-	\	l:instance_domain: {
-	\		'name': l:account_name,
-	\		'password': v:null,
-	\	}
+	\	'instance_domain': l:instance_domain,
+	\	'account_name': l:account_name,
+	\	'account_password': v:null,
 	\}
 endfunction

@@ -1,5 +1,6 @@
 command! -bar -nargs=* MastodonAddAccount call mastodon#add_account(<f-args>)
 command! -bar -nargs=* MastodonHome call mastodon#open_home(<f-args>)
+command! -bar -nargs=* MastodonSay call mastodon#open_say_buffer(<f-args>)
 
 let g:mastodon_instances = get(g:, 'mastodon_instances', {})
 

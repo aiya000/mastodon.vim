@@ -2,8 +2,8 @@ let s:V    = vital#mastodon#new()
 let s:Job  = s:V.import('System.Job')
 let s:JSON = s:V.import('Web.JSON')
 
-function! mastodon#home#show_hometimeline(mastodon_instance_name, access_token) abort
-	let l:instance_url = mastodon#func#get_instance_url(a:mastodon_instance_name)
+function! mastodon#home#show_hometimeline(instance_domain, access_token) abort
+	let l:instance_url = 'https://' . a:instance_domain
 	let l:request_url  = l:instance_url . '/api/v1/timelines/home?access_token=' . a:access_token
 
 	" Show home timeline
