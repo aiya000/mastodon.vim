@@ -1,8 +1,9 @@
 "TODO: Write comments for functions
 
-let s:V      = vital#mastodon#new()
-let s:List   = s:V.import('Data.List')
-let s:Option = s:V.import('Data.Optional')
+let s:V       = vital#mastodon#new()
+let s:List    = s:V.import('Data.List')
+let s:Option  = s:V.import('Data.Optional')
+let s:Message = s:V.import('Vim.Message')
 
 
 function! mastodon#add_account(...) abort
@@ -14,10 +15,9 @@ function! mastodon#open_home(...) abort
 	" Read account information from serialized file (See mastodon#add_account())
 	let l:maybe_instances = mastodon#account#may_read_instances()
 	if s:Option.empty(l:maybe_instances)
-		echohl Error
-		echo 'The config file reading (' . g:mastodon#CONFIG_FILE_PATH . ') is failed.'
-		echo 'Do you executed :MastodonAddAccount ?'
-		echohl None
+		redraw
+		call s:Message.error('The config file reading (' . g:mastodon#CONFIG_FILE_PATH . ') is failed.')
+		call s:Message.error('Do you executed :MastodonAddAccount ?')
 		return
 	endif
 	let l:instances = s:Option.get(l:maybe_instances)
@@ -27,17 +27,13 @@ function! mastodon#open_home(...) abort
 	" (?) l:chosen_single_account.instance_domain ∈ l:instances.map({x -> x.instance_domain})
 	let l:instance = s:List.find(l:instances, v:null, printf('v:val.instance_domain ==# "%s"', l:chosen_single_account.instance_domain))
 	if l:instance is v:null
-		echohl Error
-		echo l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
-		echohl None
+		redraw | call s:Message.error(l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH)
 		return
 	endif
 
 	let l:account = s:List.find(l:instance.account, v:null, printf('v:val.name ==# "%s"', l:chosen_single_account.account_name))
 	if l:account is v:null
-		echohl Error
-		echo l:chosen_account.account.name . ' of ' l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
-		echohl None
+		redraw | call s:Message.error(l:chosen_account.account.name . ' of ' l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH)
 		return
 	endif
 	let l:determined_single_account = {
@@ -51,10 +47,7 @@ function! mastodon#open_home(...) abort
 	" Request access token for this app
 	let l:maybe_auth_result = mastodon#account#auth_default_account(l:determined_single_account)
 	if s:Option.empty(l:maybe_auth_result)
-		redraw
-		echohl Error
-		echomsg 'Sorry, your account authentication is failed'
-		echohl None
+		redraw | call s:Message.error('Sorry, your account authentication is failed')
 		return
 	endif
 	let l:auth_result = s:Option.get(l:maybe_auth_result)
