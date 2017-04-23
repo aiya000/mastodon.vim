@@ -4,6 +4,8 @@ let s:Option  = s:V.import('Data.Optional')
 let s:Message = s:V.import('Vim.Message')
 
 
+" Open the buffer of 'mastodon-say'.
+" Apply default keymaps to its buffer
 function! mastodon#say#open_buffer() abort
 	"NOTE: Can I set bufname by the way of other than :file ?
 	botright 10new | setl filetype=mastodon-say | file mastodon-say
@@ -14,6 +16,7 @@ function! mastodon#say#open_buffer() abort
 endfunction
 
 
+" Send the detail of the buffer as toot !
 function! mastodon#say#execute() abort
 	let l:maybe_mastodon_say_bufnr = s:find_mastdon_say_bufnr_in_currenet_tab()
 	if s:Option.empty(l:maybe_mastodon_say_bufnr)
