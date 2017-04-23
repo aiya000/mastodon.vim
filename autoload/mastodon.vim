@@ -1,4 +1,3 @@
-"TODO: Write comments for functions
 "TODO: Add tests ミミ( ＞＜)
 
 let s:V       = vital#mastodon#new()
@@ -7,14 +6,16 @@ let s:Option  = s:V.import('Data.Optional')
 let s:Message = s:V.import('Vim.Message')
 
 
+" Pass the arguments to mastodon#account#create()
 function! mastodon#add_account(...) abort
 	call mastodon#account#create(a:000)
 endfunction
 
 
+" Authorize an account of an instance.
+" And show the buffer of mastodon home timeline
 function! mastodon#open_home(...) abort
 	try
-		" Request access token for this app
 		let l:maybe_pair_of_auth = mastodon#account#auth_default_account(a:000)
 		if s:Option.empty(l:maybe_pair_of_auth)
 			throw 'Sorry, your account authentication is failed'
@@ -30,6 +31,7 @@ function! mastodon#open_home(...) abort
 endfunction
 
 
+" Call mastodon#say#open_buffer()
 function! mastodon#open_say_buffer() abort
 	call mastodon#say#open_buffer()
 endfunction
