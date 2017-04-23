@@ -58,17 +58,51 @@ function! mastodon#account#create(args) abort
 endfunction
 
 
-"TODO: If decode is failed
-function! mastodon#account#may_read_instances()
-	return filereadable(g:mastodon#CONFIG_FILE_PATH)
-	\        ? s:Option.some(s:read_json(g:mastodon#CONFIG_FILE_PATH))
-	\        : s:Option.none()
+" This is composing mastodon#account#read() and mastodon#account#auth_single_account() .
+" Read account information from the config file + (arguments or 'stdin')
+" (Please see s:input_instance_account_choice() about 'stdin').
+" And authorize its account.
+" Return the pair of authorized account ('single account' structure) and authentication information.
+function! mastodon#account#auth_default_account(args) abort
+	let l:single_account = mastodon#account#read(a:args)
+	return s:Option.map(mastodon#account#auth_single_account(l:single_account), {x -> [l:single_account, x]})
+endfunction
+
+
+function! mastodon#account#read(args) abort
+	" Read account information from serialized file (See mastodon#add_account())
+	let l:maybe_instances = s:may_read_instances()
+	if s:Option.empty(l:maybe_instances)
+		throw 'The config file reading (' . g:mastodon#CONFIG_FILE_PATH . ") is failed.\n"
+		\	. 'Do you executed :MastodonAddAccount ?'
+	endif
+	let l:instances = s:Option.get(l:maybe_instances)
+
+	" Confirm target account for logging in
+	let l:chosen_single_account = s:input_instance_account_choice(a:args)
+	" (?) l:chosen_single_account.instance_domain ∈ l:instances.map({x -> x.instance_domain})
+	let l:instance = s:List.find(l:instances, v:null, printf('v:val.instance_domain ==# "%s"', l:chosen_single_account.instance_domain))
+	if l:instance is v:null
+		throw l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
+	endif
+
+	let l:account = s:List.find(l:instance.account, v:null, printf('v:val.name ==# "%s"', l:chosen_single_account.account_name))
+	if l:account is v:null
+		throw l:chosen_account.account.name . ' of ' l:chosen_single_account.instance_domain . ' cannot be found in ' . g:mastodon#CONFIG_FILE_PATH
+	endif
+	let l:determined_single_account = {
+	\	'instance_domain': l:chosen_single_account.instance_domain,
+	\	'account_name': l:chosen_single_account.account_name,
+	\	'account_password': l:account.password,
+	\}
+
+	return l:determined_single_account
 endfunction
 
 
 "TODO: Use serialized file (implement the arround of mastodon#add_account)
 " Take 'single_account' structure
-function! mastodon#account#auth_default_account(single_account) abort
+function! mastodon#account#auth_single_account(single_account) abort
 	let l:instance_url = 'https://' . a:single_account.instance_domain
 
 	let l:parameters = printf(
@@ -93,3 +127,29 @@ endfunction
 " --- Script local --- "
 
 let s:read_json = {x -> s:JSON.decode(join(readfile(x)))}
+
+
+"TODO: If decode is failed
+function! s:may_read_instances()
+	return filereadable(g:mastodon#CONFIG_FILE_PATH)
+	\        ? s:Option.some(s:read_json(g:mastodon#CONFIG_FILE_PATH))
+	\        : s:Option.none()
+endfunction
+
+
+" Return 'single_account' structure
+function! s:input_instance_account_choice(args) abort
+	let l:instance_domain = exists('a:args[0]')
+	\                     ? a:args[0]
+	\                     : input('input instance domain(ex: mastodon.cloud, mastodon.jp): ')
+	let l:account_name = exists('a:args[1]')
+	\                  ? a:args[1]
+	\                  : exists(printf('g:mastodon_instances["%s"].default_account', l:instance_domain))
+	\                    ? g:mastodon_instances[l:instance_domain].default_account
+	\                    : input('input account name for the domain(ex: aiya000@example.com): ')
+	return {
+	\	'instance_domain': l:instance_domain,
+	\	'account_name': l:account_name,
+	\	'account_password': v:null,
+	\}
+endfunction
