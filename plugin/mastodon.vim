@@ -1,6 +1,6 @@
 command! -bar -nargs=* MastodonAddAccount call mastodon#add_account(<f-args>)
 command! -bar -nargs=* MastodonHome call mastodon#open_home(<f-args>)
-command! -bar -nargs=* MastodonSay call mastodon#open_say_buffer(<f-args>)
+command! -bar -nargs=0 MastodonSay call mastodon#open_say_buffer()
 
 let g:mastodon_instances = get(g:, 'mastodon_instances', {})
 
@@ -10,3 +10,7 @@ let g:mastodon#APP_CLIENT_SECRET = 'b38cebc9235edb15db12320866c4258606f0172ce5aa
 
 "TODO: xdg dir
 let g:mastodon#CONFIG_FILE_PATH = $HOME . '/.vim-mastodon.json' | lockvar g:mastodon#CONFIG_FILE_PATH
+
+
+" In mastodon-say buffer (See say.vim)
+nmap <silent> <Plug>(mastodon-execute-say) :<C-u>call mastodon#say#execute()<CR>

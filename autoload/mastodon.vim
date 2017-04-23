@@ -57,7 +57,8 @@ function! mastodon#open_home(...) abort
 endfunction
 
 
-function! mastodon#open_say_buffer(...) abort
+function! mastodon#open_say_buffer() abort
+	call mastodon#say#open_buffer()
 endfunction
 
 
