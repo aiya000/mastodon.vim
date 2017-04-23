@@ -59,9 +59,6 @@ endfunction
 
 
 " This is composing mastodon#account#read() and mastodon#account#auth_single_account() .
-" Read account information from the config file + (arguments or 'stdin')
-" (Please see s:input_instance_account_choice() about 'stdin').
-" And authorize its account.
 " Return the pair of authorized account ('single account' structure) and authentication information.
 function! mastodon#account#auth_default_account(args) abort
 	let l:single_account = mastodon#account#read(a:args)
@@ -69,6 +66,8 @@ function! mastodon#account#auth_default_account(args) abort
 endfunction
 
 
+" Read account information from the config file + (arguments or 'stdin')
+" (Please see s:input_instance_account_choice() about 'stdin').
 function! mastodon#account#read(args) abort
 	" Read account information from serialized file (See mastodon#add_account())
 	let l:maybe_instances = s:may_read_instances()
@@ -100,8 +99,8 @@ function! mastodon#account#read(args) abort
 endfunction
 
 
-"TODO: Use serialized file (implement the arround of mastodon#add_account)
-" Take 'single_account' structure
+" Authorize the account.
+" This function takes 'single_account' structure as an argument.
 function! mastodon#account#auth_single_account(single_account) abort
 	let l:instance_url = 'https://' . a:single_account.instance_domain
 
