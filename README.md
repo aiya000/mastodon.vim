@@ -13,3 +13,6 @@ A mastodon client for Vim and NeoVim
 
 ## If you use NeoVim
 - NeoVim 0.2.0 or later
+
+## TODO
+- Add tests ミミ( ＞＜)
