@@ -1,6 +1,5 @@
 let s:V      = vital#mastodon#new()
 let s:Dict   = s:V.import('Data.Dict')
-let s:JSON   = s:V.import('Web.JSON')
 let s:List   = s:V.import('Data.List')
 let s:Option = s:V.import('Data.Optional')
 let s:Random = s:V.import('Random')
@@ -70,7 +69,7 @@ function! mastodon#account#add(args) abort
 		\	'account': [l:account],
 		\})
 	endif
-	call writefile([s:JSON.encode(l:old_instances)], g:mastodon#CONFIG_FILE_PATH)
+	call writefile([json_encode(l:old_instances)], g:mastodon#CONFIG_FILE_PATH)
 
 	redraw
 	echomsg l:account_name . ' is added ! (' . l:instance_domain . ')'
@@ -138,7 +137,7 @@ function! mastodon#account#auth_single_account(single_account) abort
 	"TODO: I may can use vital's system()
 	let l:auth_result = system(printf('curl -X POST --silent "%s"', l:request_url))
 	try
-		return s:Option.some(s:JSON.decode(l:auth_result))
+		return s:Option.some(json_decode(l:auth_result))
 	catch /E15/
 		return s:Option.none()
 	endtry
@@ -147,7 +146,7 @@ endfunction
 
 " --- Script local --- "
 
-let s:read_json = {x -> s:JSON.decode(join(readfile(x)))}
+let s:read_json = {x -> json_decode(join(readfile(x)))}
 
 
 "TODO: If decode is failed
@@ -194,7 +193,7 @@ function! s:register_to_an_instance(app_name, instance_domain) abort
 		"   , "client_id":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
 		"   , "client_secret":"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
 		"   }
-		return s:Option.some(s:JSON.decode(l:responce_plain))
+		return s:Option.some(json_decode(l:responce_plain))
 	catch /E15/
 		VimConsoleLog v:exception
 		return s:Option.none()

@@ -1,5 +1,4 @@
 let s:V       = vital#mastodon#new()
-let s:JSON    = s:V.import('Web.JSON')
 let s:Job     = s:V.import('System.Job')
 let s:List    = s:V.import('Data.List')
 let s:Message = s:V.import('Vim.Message')
@@ -95,7 +94,7 @@ endfunction
 " Show toot result
 function! s:notify_toot_result(job_struct, _, __, ___) abort
 	" Regard the result is succeed if stdout_result has 'id' and 'created_at' as key
-	let l:result_response = s:JSON.decode(a:job_struct.stdout_result)
+	let l:result_response = json_decode(a:job_struct.stdout_result)
 	if has_key(l:result_response, 'id') && has_key(l:result_response, 'created_at')
 		echo 'mastodon.vim: The toot is send :)'
 	else

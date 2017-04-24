@@ -1,6 +1,5 @@
-let s:V    = vital#mastodon#new()
-let s:Job  = s:V.import('System.Job')
-let s:JSON = s:V.import('Web.JSON')
+let s:V   = vital#mastodon#new()
+let s:Job = s:V.import('System.Job')
 
 
 " Open home timeline buffer
@@ -20,7 +19,7 @@ endfunction
 " --- Script local --- "
 
 function! s:open_hometimeline_buffer(job_struct, _, __, ___) abort
-	let l:toots        = s:JSON.decode(a:job_struct.stdout_result)
+	let l:toots        = json_decode(a:job_struct.stdout_result)
 	let l:format_toots = []
 	for l:toot in l:toots
 		let l:account_username     = l:toot.account.username
