@@ -1,9 +1,15 @@
-"TODO: Add tests ミミ( ＞＜)
-
 let s:V       = vital#mastodon#new()
 let s:List    = s:V.import('Data.List')
 let s:Option  = s:V.import('Data.Optional')
 let s:Message = s:V.import('Vim.Message')
+
+"
+" 'mastodon#' for main rootine.
+" 'mastodon#' functions catches exceptions.
+" 'mastodon#some#' functions throws exceptions.
+" The commands and keymaps calls 'mastodon#' functions.
+" The commands and keymaps doesn't call 'mastodon#some#' functions directly.
+"
 
 
 " Pass the arguments to mastodon#account#create()
