@@ -3,6 +3,7 @@ let s:Dict   = s:V.import('Data.Dict')
 let s:JSON   = s:V.import('Web.JSON')
 let s:List   = s:V.import('Data.List')
 let s:Option = s:V.import('Data.Optional')
+let s:URI    = s:V.import('Web.URI')
 
 
 "FIXME: Don't use plain text for password
@@ -105,11 +106,12 @@ function! mastodon#account#auth_single_account(single_account) abort
 	let l:instance_url = 'https://' . a:single_account.instance_domain
 
 	let l:parameters = printf(
-	\	'client_id=%s&client_secret=%s&grant_type=password&username=%s&password=%s',
-	\	g:mastodon#APP_CLIENT_ID,
-	\	g:mastodon#APP_CLIENT_SECRET,
-	\	a:single_account.account_name,
-	\	a:single_account.account_password,
+	\	'client_id=%s&client_secret=%s&grant_type=password&username=%s&password=%s&scope=%s',
+	\	s:URI.encode(g:mastodon#APP_CLIENT_ID),
+	\	s:URI.encode(g:mastodon#APP_CLIENT_SECRET),
+	\	s:URI.encode(a:single_account.account_name),
+	\	s:URI.encode(a:single_account.account_password),
+	\	s:URI.encode('read write follow'),
 	\)
 	let l:request_url = l:instance_url . '/oauth/token?' . l:parameters
 

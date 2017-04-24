@@ -38,6 +38,15 @@ endfunction
 
 
 " Call mastodon#say#open_buffer()
-function! mastodon#open_say_buffer() abort
-	call mastodon#say#open_buffer()
+function! mastodon#open_say_buffer(...) abort
+	if len(a:000) isnot 2
+		redraw | call s:Message.error("mastodon#open_say_buffer() requires two arguments of 'instance name' and 'account name'")
+		return
+	endif
+	call mastodon#say#open_buffer(a:1, a:2)
+endfunction
+
+
+function! mastodon#execute_say() abort
+	call mastodon#say#execute()
 endfunction
