@@ -14,11 +14,6 @@ command! -bar -nargs=* MastodonSay call mastodon#open_say_buffer(<f-args>)
 
 " --- Global variable --- "
 
-let g:mastodon_instances = get(g:, 'mastodon_instances', {})
-
-let g:mastodon#APP_CLIENT_ID     = '48c18127ac449e905bb70b6ee121e5f1060251368f5fb4faaa2e3279cda24bed' | lockvar g:mastodon#APP_CLIENT_ID
-let g:mastodon#APP_CLIENT_SECRET = '9258646f0a19721b28c73c85eafb2140a1a5b401f522c3f8e87bd8f1778ab138' | lockvar g:mastodon#APP_CLIENT_SECRET
-
 "TODO: xdg dir
 let g:mastodon#CONFIG_FILE_PATH = $HOME . '/.vim-mastodon.json' | lockvar g:mastodon#CONFIG_FILE_PATH
 

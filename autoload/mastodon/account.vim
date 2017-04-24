@@ -8,6 +8,9 @@ let s:URI    = s:V.import('Web.URI')
 
 "FIXME: Don't use plain text for password
 "TODO: If user chose account is already exists
+" Take your account information of the mastodon instance,
+" and register this app (mastodon.vim) just for its account.
+" And write the results to g:mastodon#CONFIG_FILE_PATH if app registration is succeed.
 " Return 'instance' structure
 function! mastodon#account#create(args) abort
 	"TODO: Rename 'account' to 'accounts'
@@ -18,6 +21,8 @@ function! mastodon#account#create(args) abort
 	"     [                                    <-- the account list of 'mastodon.cloud'
 	"       { 'name': aiya000.develop@gmail'   <-- an account of 'mastodon.cloud'
 	"       , 'password': 'gavriil_dropout'
+	"       , 'app_client_id': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx'      <--| these are emited by
+	"       , 'app_client_secret': 'yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy'  <--|   mastodon#app#register_to_an_instance()
 	"       }
 	"     ]
 	"   }
@@ -35,9 +40,21 @@ function! mastodon#account#create(args) abort
 	\                  ? a:args[1]
 	\                  : input('account name for the domain(ex: aiya000@example.com): ')
 	let l:account_password = inputsecret('account password: ')
+
+	" Register mastodon.vim with your account
+	let l:app_name = 'mastodon.vim-for-' . l:account_name
+	let l:maybe_app_registration_result = s:register_to_an_instance(l:app_name, l:instance_domain)
+	if s:Option.empty(l:maybe_app_registration_result)
+		throw 'app registration is failed'
+	endif
+	let l:app_registration_result = s:Option.get(l:maybe_app_registration_result)
+
+	" Create account structure
 	let l:account = {
 	\	'name': l:account_name,
 	\	'password': l:account_password,
+	\	'app_client_id': l:app_registration_result.client_id,
+	\	'app_client_secret': l:app_registration_result.client_secret,
 	\}
 
 	" Add new account to the file
@@ -94,6 +111,8 @@ function! mastodon#account#read(args) abort
 	\	'instance_domain': l:chosen_single_account.instance_domain,
 	\	'account_name': l:chosen_single_account.account_name,
 	\	'account_password': l:account.password,
+	\	'app_client_id': l:account.app_client_id,
+	\	'app_client_secret': l:account.app_client_secret,
 	\}
 
 	return l:determined_single_account
@@ -107,8 +126,8 @@ function! mastodon#account#auth_single_account(single_account) abort
 
 	let l:parameters = printf(
 	\	'client_id=%s&client_secret=%s&grant_type=password&username=%s&password=%s&scope=%s',
-	\	s:URI.encode(g:mastodon#APP_CLIENT_ID),
-	\	s:URI.encode(g:mastodon#APP_CLIENT_SECRET),
+	\	s:URI.encode(a:single_account.app_client_id),
+	\	s:URI.encode(a:single_account.app_client_secret),
 	\	s:URI.encode(a:single_account.account_name),
 	\	s:URI.encode(a:single_account.account_password),
 	\	s:URI.encode('read write follow'),
@@ -152,5 +171,31 @@ function! s:input_instance_account_choice(args) abort
 	\	'instance_domain': l:instance_domain,
 	\	'account_name': l:account_name,
 	\	'account_password': v:null,
+	\	'app_client_id': v:null,
+	\	'app_client_secret': v:null,
 	\}
+endfunction
+
+
+" Register app as a:app_name to a:instance_domain with authorized your account.
+function! s:register_to_an_instance(app_name, instance_domain) abort
+	let l:request_url        = 'https://' . a:instance_domain . '/api/v1/apps'
+	let l:request_parameters = '?client_name=' . s:URI.encode(a:app_name)
+	\	. '&redirect_uris=urn:ietf:wg:oauth:2.0:oob&scopes=read%20write%20follow&website=https://github.com/aiya000/mastodon.vim'
+	let l:fully_request_url  = l:request_url . l:request_parameters
+
+	"TODO: I may can use vital's system()
+	let l:responce_plain = system(printf('curl --silent -X POST "%s"', l:fully_request_url))
+	try
+		"Example for responce:
+		"   { "id":99999
+		"   , "redirect_uri":"urn:ietf:wg:oauth:2.0:oob"
+		"   , "client_id":"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+		"   , "client_secret":"yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy"
+		"   }
+		return s:Option.some(s:JSON.decode(l:responce_plain))
+	catch /E15/
+		VimConsoleLog v:exception
+		return s:Option.none()
+	endtry
 endfunction
