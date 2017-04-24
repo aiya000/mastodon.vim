@@ -1,4 +1,10 @@
 mastodon
-91e8a016cd0d15562046ce577180e5098f300a33
+69f7fe973217ea959db113d5119a7b8cf1e07e8e
 
 Data.Optional
+Web.URI
+Data.Dict
+Data.List
+System.Job
+Vim.Message
+Web.JSON

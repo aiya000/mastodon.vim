@@ -3,13 +3,13 @@
 " Do not mofidify the code nor insert new lines before '" ___vital___'
 if v:version > 703 || v:version == 703 && has('patch1170')
   function! vital#_mastodon#Data#Dict#import() abort
-    return map({'_vital_depends': '', 'clear': '', 'max_by': '', 'foldl': '', 'pick': '', 'omit': '', 'swap': '', 'min_by': '', 'lookup': '', 'foldr': '', 'make_index': '', 'make': '', '_vital_loaded': ''},  'function("s:" . v:key)')
+    return map({'pick': '', 'clear': '', 'max_by': '', 'foldl': '', 'swap': '', 'omit': '', 'min_by': '', 'foldr': '', 'make_index': '', 'make': ''},  'function("s:" . v:key)')
   endfunction
 else
   function! s:_SID() abort
     return matchstr(expand('<sfile>'), '<SNR>\zs\d\+\ze__SID$')
   endfunction
-  execute join(['function! vital#_mastodon#Data#Dict#import() abort', printf("return map({'_vital_depends': '', 'clear': '', 'max_by': '', 'foldl': '', 'pick': '', 'omit': '', 'swap': '', 'min_by': '', 'lookup': '', 'foldr': '', 'make_index': '', 'make': '', '_vital_loaded': ''}, \"function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
+  execute join(['function! vital#_mastodon#Data#Dict#import() abort', printf("return map({'pick': '', 'clear': '', 'max_by': '', 'foldl': '', 'swap': '', 'omit': '', 'min_by': '', 'foldr': '', 'make_index': '', 'make': ''}, \"function('<SNR>%s_' . v:key)\")", s:_SID()), 'endfunction'], "\n")
   delfunction s:_SID
 endif
 " ___vital___
@@ -17,15 +17,6 @@ endif
 
 let s:save_cpo = &cpo
 set cpo&vim
-
-function! s:_vital_loaded(V) abort
-  let s:V = a:V
-  let s:Option = s:V.import('Data.Optional')
-endfunction
-
-function! s:_vital_depends() abort
-  return ['Data.Optional']
-endfunction
 
 " Makes a dict from keys and values
 function! s:make(keys, values, ...) abort
@@ -117,12 +108,6 @@ endfunction
 
 function! s:foldr(f, init, dict) abort
   return s:_foldl(a:f, a:init, reverse(items(a:dict)))
-endfunction
-
-function! s:lookup(key, dict) abort
-	return has_key(a:dict, a:key)
-	\        ? s:Option.some(a:dict[a:key])
-	\        : s:Option.none()
 endfunction
 
 let &cpo = s:save_cpo
