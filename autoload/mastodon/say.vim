@@ -12,7 +12,7 @@ function! mastodon#say#open_buffer() abort
 	setl noreadonly modifiable buftype=nofile
 	"TODO: Add g:mastodon_no_default_keymaps
 	call s:define_default_keymaps()
-	normal! i
+	startinsert
 endfunction
 
 
@@ -27,6 +27,8 @@ function! mastodon#say#execute() abort
 	let l:maston_say_bufnr = s:Option.get(l:maybe_mastodon_say_bufnr)
 	let l:toot_detail      = s:with_buffer(l:maston_say_bufnr, {-> join(getline(1, '$'), "\n")})
 	VimConsoleLog l:toot_detail
+	execute 'bwipe' l:maston_say_bufnr
+	quit
 endfunction
 
 
