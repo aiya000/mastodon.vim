@@ -12,9 +12,9 @@ let s:Message = s:V.import('Vim.Message')
 "
 
 
-" Pass the arguments to mastodon#account#create()
+" Pass the arguments to mastodon#account#add()
 function! mastodon#add_account(...) abort
-	call mastodon#account#create(a:000)
+	call mastodon#account#add(a:000)
 endfunction
 
 

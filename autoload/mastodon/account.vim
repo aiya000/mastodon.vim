@@ -3,6 +3,7 @@ let s:Dict   = s:V.import('Data.Dict')
 let s:JSON   = s:V.import('Web.JSON')
 let s:List   = s:V.import('Data.List')
 let s:Option = s:V.import('Data.Optional')
+let s:Random = s:V.import('Random')
 let s:URI    = s:V.import('Web.URI')
 
 
@@ -12,7 +13,7 @@ let s:URI    = s:V.import('Web.URI')
 " and register this app (mastodon.vim) just for its account.
 " And write the results to g:mastodon#CONFIG_FILE_PATH if app registration is succeed.
 " Return 'instance' structure
-function! mastodon#account#create(args) abort
+function! mastodon#account#add(args) abort
 	"TODO: Rename 'account' to 'accounts'
 	" vvv 'instance' structure vvv
 	" [                                        <-- instances
@@ -42,7 +43,7 @@ function! mastodon#account#create(args) abort
 	let l:account_password = inputsecret('account password: ')
 
 	" Register mastodon.vim with your account
-	let l:app_name = 'mastodon.vim-for-' . l:account_name
+	let l:app_name = 'mastodon.vim-' . string(s:Random.next()) . string(s:Random.next())
 	let l:maybe_app_registration_result = s:register_to_an_instance(l:app_name, l:instance_domain)
 	if s:Option.empty(l:maybe_app_registration_result)
 		throw 'app registration is failed'
