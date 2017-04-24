@@ -37,8 +37,6 @@ function! mastodon#say#execute() abort
 	\                                           b:mastodon_account_name ]
 	\   })
 	call s:send_toot(l:instance_domain, l:account_name, l:toot_detail)
-
-	execute 'bwipe' l:maston_say_bufnr
 	quit
 endfunction
 
