@@ -4,6 +4,21 @@
 :bulb: A mastodon client for Vim and NeoVim :bulb:
 
 
+# :key: How to setup :key:
+1. `:MastodonAddAccount {instance-domain} {account-name}`
+    - Example: `:MastodonAddAccount mstdn.jp aiya000@example.com`
+
+
+# :gift: How to use :gift:
+## How to toot
+1. `:MastodonSay {instance-domain} {account-name}`
+    - `mastodon-say` buffer will be opened
+    - Example: `:MastodonSay mstdn.jp aiya000@example.com`
+2. Please input your toot to `mastodon-say` buffer
+3. Please input `ctrl + m` (`<C-m>`, `<Plug>(mastodon-execute-say)`)
+    - Your toot will be send to {account-name} in {instance-domain} !
+
+
 # :grey_exclamation: Requirements :grey_exclamation:
 - Basement
     - curl
